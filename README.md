@@ -1,4 +1,4 @@
-This is a hodgepodge of code from different projects thrown together to create a Chainlit chatbot application for question-answering over BC Statutes. This is very much a work in progress with multiple known bugs, as well as being messy and disorganised!
+This is a hodgepodge of code from different projects thrown together to create a Chainlit chatbot application for question-answering over BC Statutes. WARNING it is messy and disorganized! Not intending to develop further at this time but hope to use code from here to work on a package for working with the (BC Laws API)[https://www.bclaws.gov.bc.ca/civix/template/complete/api/index.html]. Also contains code relating to using logit bias on OpenAI API to rank options.
 
 # Running the app(s)
 
@@ -41,4 +41,4 @@ Within `streamlit/civix/embeddings_search` is the main logic for generating embe
 The search itself is a very basic implementation. 
 
 ## Other things
-`section_retrieval.py` contains code related to retrieving sections from statutes by ID and also in progress work on hybrid similarity search and logit bias based ranking.
+`section_retrieval.py` contains code related to retrieving sections from statutes by ID and also in progress work on hybrid similarity search and logit bias-based ranking.
