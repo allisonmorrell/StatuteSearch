@@ -1,0 +1,216 @@
+import json
+import os
+import requests
+from bs4 import BeautifulSoup, NavigableString
+
+from pprint import pprint
+
+def main():
+    id = "02078_01"
+    name = "SBC 2002, c 1"
+
+
+    xml_content = get_xml_document(id)
+
+    soup = BeautifulSoup(xml_content, "xml")
+
+    # sections_dict = get_sections_dict(soup.act, sections_dict)
+
+
+    parts_dict = get_num_id_dict(soup.act, "part", {})
+    print("PARTS")
+    pprint(parts_dict)
+    print("")
+
+    divisions_dict = get_num_id_dict(soup.act, "division", {})
+    print("DIVISIONS")
+    pprint(divisions_dict)
+    print("")
+    
+    sections_dict = get_num_id_dict(soup.act, "section", {})
+    print("SECTIONS")
+    pprint(sections_dict)
+    print("")
+
+    section_nums_list = get_nums_list(soup.act, "section", [])
+    print(section_nums_list)
+    
+    section_number = "1"
+    id = sections_dict[section_number]
+    tag = soup.find(id=id)
+    print(tag.parent.name)
+
+
+def get_nums_list(tag, name, nums_list):
+    if tag.name == name:
+        num = get_num(tag)
+
+        if num:
+            nums_list.append(num)
+
+    for child in tag.children:
+        if isinstance(child, NavigableString):
+            continue
+
+        get_nums_list(child, name, nums_list)
+
+    return num_id_dict
+    pass
+
+
+    
+# Could alter name to get lower sections, go along list
+def get_num_id_dict(tag, name, num_id_dict):
+    if tag.name == name:
+        id = tag.get("id")
+        num = get_num(tag)
+
+        if id is not None and num is not None:
+            num_id_dict[num] = id
+
+    for child in tag.children:
+        if isinstance(child, NavigableString):
+            continue
+
+        get_num_id_dict(child, name, num_id_dict)
+
+    return num_id_dict
+
+
+def get_num(tag):
+    for child in tag.children:
+            if isinstance(child, NavigableString):
+                continue
+
+            if child.name == "num":
+                num = child.string
+                break
+    return num
+
+
+def get_sections_dict(tag, sections_dict):
+    if tag.name == "section":
+        id = tag.get("id")
+        num = get_num(tag)
+
+        if id is not None and num is not None:
+            sections_dict[num] = id
+
+    for child in tag.children:
+        if isinstance(child, NavigableString):
+            continue
+
+        get_sections_dict(child, sections_dict)
+
+    return sections_dict
+
+
+def get_xml_document(id):
+    url = f"http://www.bclaws.ca/civix/document/id/complete/statreg/{id}/xml"
+    response = requests.get(url)
+    return response.content
+
+
+
+
+# -------------- OLD OLD OLD OLD -------------- #
+
+def load_statute_by_id(id, save_to_json=False, json_path="act_data.json"):
+    xml_content = get_xml_document(id)
+    act_data = xml_to_act_data(xml_content)
+
+    if save_to_json:
+        save_xml_to_json(act_data, json_path)
+
+    return act_data 
+
+
+
+def xml_to_act_data(xml_content):
+    soup = BeautifulSoup(xml_content, "xml")
+    results_dict = {}
+    act_data = get_ids_dict(soup.act, results_dict)
+    return act_data
+
+
+
+def get_ids_dict(tag, results_dict):
+    if tag.has_attr("id"):
+        id = tag.get("id")
+
+        if tag.parent.name == "act":
+            results_dict[id] = {}
+        
+        if tag.parent.has_attr("id"):
+            parent_id = tag.parent.get("id")
+            if parent_id not in results_dict:
+                results_dict[parent_id] = {}  # Create an empty dictionary for the parent ID
+            results_dict[parent_id][id] = tag.name
+
+    for child in tag.children:
+        if child.name is not None:  # Check if the child tag has a name attribute
+            get_ids_dict(child, results_dict)
+
+    return results_dict
+
+
+
+
+def get_tag_text_dict(dictionary, text_dict):
+    for key, value in dictionary.items():
+        if key == "tag_name":
+            text_dict[value] = dictionary["text"]
+        if isinstance(value, dict):
+            get_tag_text_dict(value, text_dict)
+        elif isinstance(value, list):
+            for item in value:
+                if isinstance(item, dict):
+                    get_tag_text_dict(item, text_dict)
+    
+    return text_dict
+
+
+def find_key_value_pairs(dictionary, target_key, result_list):
+    for key, value in dictionary.items():
+        if key == target_key:
+            result_list.append(value)
+        if isinstance(value, dict):
+            find_key_value_pairs(value, target_key, result_list)
+        elif isinstance(value, list):
+            for item in value:
+                if isinstance(item, dict):
+                    find_key_value_pairs(item, target_key, result_list)
+    
+    return result_list
+            
+
+
+
+
+def extract_data_bs4(tag, level=0):
+    tag_data = {}
+    tag_data['tag_name'] = tag.name
+    if tag.text:
+        tag_data['text'] = tag.text.strip()
+    if tag.attrs:
+        tag_data['attributes'] = dict(tag.attrs)
+    tag_data['level'] = level
+    if len(list(tag.children)) > 0:
+        tag_data['children'] = [extract_data_bs4(child, level + 1) for child in tag.children if child.name is not None]
+    return tag_data
+
+
+
+def old_xml_to_act_data(xml_content):
+    soup = BeautifulSoup(xml_content, "xml")
+    act_data = extract_data_bs4(soup.act)
+    return act_data
+
+
+def save_xml_to_json(act_data, json_path):
+    with open(json_path, 'w') as f:
+        json.dump(act_data, f)
+
+
+if __name__ == "__main__":
+    main()
