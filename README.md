@@ -1,4 +1,4 @@
-This is a hodgepodge of code from different projects thrown together to create a Chainlit chatbot application for question-answering over BC Statutes. WARNING it is messy and disorganized! Not intending to develop further at this time but hope to use code from here to work on a package for working with the (BC Laws API)[https://www.bclaws.gov.bc.ca/civix/template/complete/api/index.html]. Also contains code relating to using logit bias on OpenAI API to rank options.
+This is a hodgepodge of code from different projects thrown together to create a Chainlit chatbot application for question-answering over BC Statutes. WARNING it is messy and disorganized! Not intending to develop further at this time but hope to use code from here to work on a package for working with the [BC Laws API](https://www.bclaws.gov.bc.ca/civix/template/complete/api/index.html). Also contains code relating to using logit bias on OpenAI API to rank options.
 
 # Running the app(s)
 
