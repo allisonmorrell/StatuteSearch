@@ -276,7 +276,9 @@ async def get_and_handle_query():
 
     # Format elements
     side_elements = [
-        cl.Text(name="Statute Markdown", content=statute_md, display="side"),
+        cl.Text(name="Statute Markdown", 
+                content=statute_md, 
+                display="side"),
         cl.Text(name="Most Reponsive",
                 content=statute_sections_string,
                 display="side"),
